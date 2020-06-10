@@ -2,10 +2,13 @@
 
 namespace App\Entity;
 
+use App\Entity\Adresse;
+use App\Entity\Client;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CompteClientRepository;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource()
@@ -17,29 +20,30 @@ class CompteClient implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"client:read", "client:write"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({"client:read", "client:write"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="json")
+     * @Groups({"client:read", "client:write"})
      */
     private $roles = [];
 
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
+     * @Groups({"client:read", "client:write"})
      */
     private $password;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="compteclientid", cascade={"persist", "remove"})
-     */
-    private $client;
+   
 
     public function getId(): ?int
     {
@@ -119,20 +123,6 @@ class CompteClient implements UserInterface
         // $this->plainPassword = null;
     }
 
-    public function getClient(): ?Client
-    {
-        return $this->client;
-    }
-
-    public function setClient(Client $client): self
-    {
-        $this->client = $client;
-
-        // set the owning side of the relation if necessary
-        if ($client->getCompteclient() !== $this) {
-            $client->setCompteclient($this);
-        }
-
-        return $this;
-    }
+    
+   
 }

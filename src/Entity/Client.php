@@ -1,17 +1,23 @@
 <?php
 
 namespace App\Entity;
-
-use DateTimeInterface;
+use App\Entity\Adresse;
+use App\Entity\CompteClient;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ClientRepository;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+        * normalizationContext={"groups"={"client:read"}},
+        * denormalizationContext={"groups"={"client:write"}}
+*)
  * @ORM\Entity(repositoryClass=ClientRepository::class)
+
  */
 class Client
 {
@@ -19,50 +25,56 @@ class Client
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"client:read", "client:write"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"client:read", "client:write"})
      */
     private $nom;
 
     /**
      * @ORM\Column(type="string", length=50)
+      * @Groups({"client:read", "client:write"})
      */
     private $prenom;
 
     /**
      * @ORM\Column(type="date", nullable=true)
+     * @Groups({"client:read", "client:write"})
      */
     private $datenaissance;
 
     /**
      * @ORM\Column(type="integer", nullable=true)
+     * @Groups({"client:read", "client:write"})
      */
     private $tel;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $email;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"client:read", "client:write"})
      */
     private $date;
 
 
     /**
-     * @ORM\OneToMany(targetEntity=Adresse::class, mappedBy="client", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Adresse::class, mappedBy="client", orphanRemoval=true, cascade={"persist"})
+     * @Groups({"client:read", "client:write"})
+     * @ApiSubresource
      */
     private $adresse;
 
     /**
-     * @ORM\OneToOne(targetEntity=CompteClient::class, inversedBy="client", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToOne(targetEntity=CompteClient::class, cascade={"persist", "remove"})
+     * @Groups({"client:read", "client:write"})
      */
     private $compteclient;
+
+    
 
     public function __construct()
     {
@@ -118,18 +130,6 @@ class Client
         return $this;
     }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
@@ -179,11 +179,10 @@ class Client
         return $this->compteclient;
     }
 
-    public function setCompteclient(CompteClient $compteclient): self
+    public function setCompteclient(?CompteClient $compteclient): self
     {
         $this->compteclient = $compteclient;
 
         return $this;
     }
-
 }
