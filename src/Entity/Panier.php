@@ -2,10 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\PanierRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\PanierRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
+ * @ApiResource()
  * @ORM\Entity(repositoryClass=PanierRepository::class)
  */
 class Panier
@@ -31,6 +35,16 @@ class Panier
      * @ORM\Column(type="boolean")
      */
     private $statut;
+
+    /**
+     * @ORM\OneToMany(targetEntity=article::class, mappedBy="panier")
+     */
+    private $idarticle;
+
+    public function __construct()
+    {
+        $this->idarticle = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -69,6 +83,37 @@ class Panier
     public function setStatut(bool $statut): self
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|article[]
+     */
+    public function getIdarticle(): Collection
+    {
+        return $this->idarticle;
+    }
+
+    public function addIdarticle(article $idarticle): self
+    {
+        if (!$this->idarticle->contains($idarticle)) {
+            $this->idarticle[] = $idarticle;
+            $idarticle->setPanier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIdarticle(article $idarticle): self
+    {
+        if ($this->idarticle->contains($idarticle)) {
+            $this->idarticle->removeElement($idarticle);
+            // set the owning side to null (unless already changed)
+            if ($idarticle->getPanier() === $this) {
+                $idarticle->setPanier(null);
+            }
+        }
 
         return $this;
     }

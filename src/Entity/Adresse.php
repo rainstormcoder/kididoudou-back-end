@@ -2,10 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\AdresseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\AdresseRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
 
 /**
+ * @ApiResource()
  * @ORM\Entity(repositoryClass=AdresseRepository::class)
  */
 class Adresse
@@ -41,6 +43,12 @@ class Adresse
      * @ORM\Column(type="string", length=255)
      */
     private $pays;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Client::class, inversedBy="adresse")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $client;
 
     public function getId(): ?int
     {
@@ -103,6 +111,18 @@ class Adresse
     public function setPays(string $pays): self
     {
         $this->pays = $pays;
+
+        return $this;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(?Client $client): self
+    {
+        $this->client = $client;
 
         return $this;
     }

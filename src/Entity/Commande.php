@@ -2,12 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\CommandeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CommandeRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
+ * @ApiResource()
  * @ORM\Entity(repositoryClass=CommandeRepository::class)
- */
+*/
 class Commande
 {
     /**
@@ -56,6 +60,19 @@ class Commande
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $dateLivraison;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ArticleCommande::class, mappedBy="commandes")
+     */
+    private $articlecommandes;
+
+    public function __construct()
+    {
+        $this->articlecommandes = new ArrayCollection();
+    }
+
+   
+  
 
     public function getId(): ?int
     {
@@ -157,4 +174,37 @@ class Commande
 
         return $this;
     }
+
+    /**
+     * @return Collection|ArticleCommande[]
+     */
+    public function getArticlecommandes(): Collection
+    {
+        return $this->articlecommandes;
+    }
+
+    public function addArticlecommande(ArticleCommande $articlecommande): self
+    {
+        if (!$this->articlecommandes->contains($articlecommande)) {
+            $this->articlecommandes[] = $articlecommande;
+            $articlecommande->setCommandes($this);
+        }
+
+        return $this;
+    }
+
+    public function removeArticlecommande(ArticleCommande $articlecommande): self
+    {
+        if ($this->articlecommandes->contains($articlecommande)) {
+            $this->articlecommandes->removeElement($articlecommande);
+            // set the owning side to null (unless already changed)
+            if ($articlecommande->getCommandes() === $this) {
+                $articlecommande->setCommandes(null);
+            }
+        }
+
+        return $this;
+    }
+
+   
 }

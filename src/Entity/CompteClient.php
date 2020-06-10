@@ -2,13 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\CompteClientRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\CompteClientRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
+ * @ApiResource()
  * @ORM\Entity(repositoryClass=CompteClientRepository::class)
  */
-class CompteClient
+class CompteClient implements UserInterface
 {
     /**
      * @ORM\Id()
@@ -18,74 +21,117 @@ class CompteClient
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=180, unique=true)
      */
-    private $Login;
+    private $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="json")
      */
-    private $pass;
+    private $roles = [];
 
     /**
-     * @ORM\Column(type="datetime")
+     * @var string The hashed password
+     * @ORM\Column(type="string")
      */
-    private $date;
+    private $password;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\OneToOne(targetEntity=Client::class, mappedBy="compteclientid", cascade={"persist", "remove"})
      */
-    private $sessionStatut;
+    private $client;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getLogin(): ?string
+    public function getEmail(): ?string
     {
-        return $this->Login;
+        return $this->email;
     }
 
-    public function setLogin(string $Login): self
+    public function setEmail(string $email): self
     {
-        $this->Login = $Login;
+        $this->email = $email;
 
         return $this;
     }
 
-    public function getPass(): ?string
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUsername(): string
     {
-        return $this->pass;
+        return (string) $this->email;
     }
 
-    public function setPass(string $pass): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->pass = $pass;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    /**
+     * @see UserInterface
+     */
+    public function getPassword(): string
     {
-        return $this->date;
+        return (string) $this->password;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function setPassword(string $password): self
     {
-        $this->date = $date;
+        $this->password = $password;
 
         return $this;
     }
 
-    public function getSessionStatut(): ?bool
+    /**
+     * @see UserInterface
+     */
+    public function getSalt()
     {
-        return $this->sessionStatut;
+        // not needed when using the "bcrypt" algorithm in security.yaml
     }
 
-    public function setSessionStatut(bool $sessionStatut): self
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
     {
-        $this->sessionStatut = $sessionStatut;
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getClient(): ?Client
+    {
+        return $this->client;
+    }
+
+    public function setClient(Client $client): self
+    {
+        $this->client = $client;
+
+        // set the owning side of the relation if necessary
+        if ($client->getCompteclient() !== $this) {
+            $client->setCompteclient($this);
+        }
 
         return $this;
     }

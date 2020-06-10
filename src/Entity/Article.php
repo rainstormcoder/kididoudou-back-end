@@ -2,12 +2,20 @@
 
 namespace App\Entity;
 
-use App\Repository\ArticleRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ArticleRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * @ORM\Entity(repositoryClass=ArticleRepository::class)
- */
+* @ORM\Entity(repositoryClass=ArticleRepository::class)
+* @ApiResource(
+* attributes={
+*          "pagination_items_per_page"=12
+*     }
+*)
+*/
 class Article
 {
     /**
@@ -76,6 +84,30 @@ class Article
      * @ORM\Column(type="boolean")
      */
     private $statut;
+
+    /**
+     * @ORM\OneToMany(targetEntity=ArticleCommande::class, mappedBy="article", cascade={"persist"})
+     */
+    private $commandes;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Panier::class, inversedBy="idarticle")
+     */
+    private $panier;
+
+    /**
+     * @ORM\Column(type="smallint")
+     */
+    private $nbimage;
+
+   
+
+    public function __construct()
+    {
+        $this->commandes = new ArrayCollection();
+    }
+
+    
 
     public function getId(): ?int
     {
@@ -225,4 +257,29 @@ class Article
 
         return $this;
     }
+
+    public function getPanier(): ?Panier
+    {
+        return $this->panier;
+    }
+
+    public function setPanier(?Panier $panier): self
+    {
+        $this->panier = $panier;
+
+        return $this;
+    }
+
+    public function getNbimage(): ?int
+    {
+        return $this->nbimage;
+    }
+
+    public function setNbimage(int $nbimage): self
+    {
+        $this->nbimage = $nbimage;
+
+        return $this;
+    }
+   
 }
